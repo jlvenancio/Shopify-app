@@ -1,0 +1,6 @@
+api_version = "2024-10"
+type = "theme"
+name = "CartPro Drawer"
+
+[[extensions]]
+type = "theme"

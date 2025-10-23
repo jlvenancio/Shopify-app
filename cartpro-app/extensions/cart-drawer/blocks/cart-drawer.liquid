@@ -1,0 +1,233 @@
+{% comment %}
+  CartPro - Cart Drawer Block
+  This block renders a sliding cart drawer with upsells
+{% endcomment %}
+
+{{ 'cart-drawer.css' | asset_url | stylesheet_tag }}
+
+<div id="cartpro-drawer" class="cartpro-drawer cartpro-drawer--{{ block.settings.position }}" data-drawer-position="{{ block.settings.position }}">
+  <div class="cartpro-overlay" id="cartpro-overlay"></div>
+
+  <div class="cartpro-drawer__container" style="width: {{ block.settings.drawer_width }}px;">
+    <!-- Header -->
+    <div class="cartpro-drawer__header" style="background-color: {{ block.settings.primary_color }}; color: {{ block.settings.text_color }};">
+      <h2 class="cartpro-drawer__title">{{ block.settings.cart_title }}</h2>
+      <button class="cartpro-drawer__close" id="cartpro-close" aria-label="Close cart">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Free Shipping Bar -->
+    {% if block.settings.free_shipping_enabled %}
+    <div class="cartpro-shipping-bar" id="cartpro-shipping-bar">
+      <div class="cartpro-shipping-bar__progress">
+        <div class="cartpro-shipping-bar__fill" id="cartpro-shipping-progress"></div>
+      </div>
+      <p class="cartpro-shipping-bar__text" id="cartpro-shipping-text"></p>
+    </div>
+    {% endif %}
+
+    <!-- Countdown Timer -->
+    {% if block.settings.timer_enabled %}
+    <div class="cartpro-timer" id="cartpro-timer">
+      <p class="cartpro-timer__text">{{ block.settings.timer_message }}</p>
+      <div class="cartpro-timer__countdown" id="cartpro-countdown">10:00</div>
+    </div>
+    {% endif %}
+
+    <!-- Cart Items -->
+    <div class="cartpro-drawer__body">
+      <div id="cartpro-items" class="cartpro-items">
+        <!-- Cart items will be dynamically inserted here -->
+      </div>
+
+      <!-- Upsell Products -->
+      {% if block.settings.upsell_enabled %}
+      <div class="cartpro-upsells" id="cartpro-upsells">
+        <h3 class="cartpro-upsells__title">{{ block.settings.upsell_title }}</h3>
+        <div id="cartpro-upsell-products" class="cartpro-upsells__grid">
+          <!-- Upsell products will be dynamically inserted here -->
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <div class="cartpro-drawer__footer" style="background-color: {{ block.settings.secondary_color }};">
+      <div class="cartpro-subtotal">
+        <span class="cartpro-subtotal__label">Subtotal:</span>
+        <span class="cartpro-subtotal__amount" id="cartpro-subtotal">$0.00</span>
+      </div>
+
+      <button
+        class="cartpro-checkout-btn"
+        id="cartpro-checkout"
+        style="background-color: {{ block.settings.button_color }}; color: {{ block.settings.text_color }};"
+      >
+        {{ block.settings.checkout_text }}
+      </button>
+
+      <a href="/cart" class="cartpro-view-cart">View full cart</a>
+    </div>
+  </div>
+</div>
+
+<script src="{{ 'cart-drawer.js' | asset_url }}" defer></script>
+
+<script>
+  // Pass settings to JavaScript
+  window.CartProSettings = {
+    freeShippingEnabled: {{ block.settings.free_shipping_enabled | json }},
+    freeShippingThreshold: {{ block.settings.free_shipping_threshold | json }},
+    freeShippingMessage: {{ block.settings.free_shipping_message | json }},
+    timerEnabled: {{ block.settings.timer_enabled | json }},
+    timerDuration: {{ block.settings.timer_duration | json }},
+    upsellEnabled: {{ block.settings.upsell_enabled | json }},
+    maxUpsellProducts: {{ block.settings.max_upsell_products | json }},
+    primaryColor: {{ block.settings.primary_color | json }},
+    buttonColor: {{ block.settings.button_color | json }},
+    textColor: {{ block.settings.text_color | json }}
+  };
+</script>
+
+{% schema %}
+{
+  "name": "CartPro Drawer",
+  "target": "body",
+  "settings": [
+    {
+      "type": "text",
+      "id": "cart_title",
+      "label": "Cart Title",
+      "default": "Your Cart"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Drawer Position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "range",
+      "id": "drawer_width",
+      "label": "Drawer Width",
+      "min": 300,
+      "max": 600,
+      "step": 50,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "secondary_color",
+      "label": "Secondary Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Free Shipping Bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "free_shipping_enabled",
+      "label": "Enable Free Shipping Bar",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "free_shipping_threshold",
+      "label": "Free Shipping Threshold",
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "free_shipping_message",
+      "label": "Free Shipping Message",
+      "default": "Free shipping on orders over {amount}"
+    },
+    {
+      "type": "header",
+      "content": "Upsells"
+    },
+    {
+      "type": "checkbox",
+      "id": "upsell_enabled",
+      "label": "Enable Product Upsells",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "upsell_title",
+      "label": "Upsell Section Title",
+      "default": "You may also like"
+    },
+    {
+      "type": "range",
+      "id": "max_upsell_products",
+      "label": "Maximum Upsell Products",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Countdown Timer"
+    },
+    {
+      "type": "checkbox",
+      "id": "timer_enabled",
+      "label": "Enable Countdown Timer",
+      "default": false
+    },
+    {
+      "type": "number",
+      "id": "timer_duration",
+      "label": "Timer Duration (seconds)",
+      "default": 600
+    },
+    {
+      "type": "text",
+      "id": "timer_message",
+      "label": "Timer Message",
+      "default": "Hurry! Offer ends in"
+    },
+    {
+      "type": "text",
+      "id": "checkout_text",
+      "label": "Checkout Button Text",
+      "default": "Checkout"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Session storage for Shopify OAuth
+model Session {
+  id          String    @id
+  shop        String
+  state       String
+  isOnline    Boolean   @default(false)
+  scope       String?
+  expires     DateTime?
+  accessToken String
+  userId      BigInt?
+  firstName   String?
+  lastName    String?
+  email       String?
+  accountOwner Boolean  @default(false)
+  locale      String?
+  collaborator Boolean? @default(false)
+  emailVerified Boolean? @default(false)
+}
+
+// Shop settings
+model ShopSettings {
+  id                    String   @id @default(cuid())
+  shop                  String   @unique
+  isActive              Boolean  @default(true)
+  plan                  String   @default("free") // free, starter, professional, enterprise
+
+  // Cart Drawer Settings
+  drawerPosition        String   @default("right") // left, right
+  drawerWidth           Int      @default(400)
+  primaryColor          String   @default("#000000")
+  secondaryColor        String   @default("#ffffff")
+  buttonColor           String   @default("#000000")
+  textColor             String   @default("#000000")
+
+  // Free Shipping Bar
+  freeShippingEnabled   Boolean  @default(false)
+  freeShippingThreshold Float    @default(50.0)
+  freeShippingMessage   String   @default("Free shipping on orders over {amount}")
+
+  // Upsell Settings
+  upsellEnabled         Boolean  @default(true)
+  upsellTitle           String   @default("You may also like")
+  maxUpsellProducts     Int      @default(3)
+
+  // Countdown Timer
+  timerEnabled          Boolean  @default(false)
+  timerDuration         Int      @default(600) // seconds
+  timerMessage          String   @default("Hurry! Offer ends in")
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  upsellRules           UpsellRule[]
+  analytics             Analytics[]
+}
+
+// Upsell Rules
+model UpsellRule {
+  id                String        @id @default(cuid())
+  shop              String
+  shopSettings      ShopSettings  @relation(fields: [shop], references: [shop])
+
+  name              String
+  isActive          Boolean       @default(true)
+
+  // Trigger conditions
+  triggerType       String        // cart_contains, cart_value, specific_product
+  triggerValue      String?       // product_id or amount
+
+  // Recommended products
+  recommendedProducts String      // JSON array of product IDs
+  displayType       String        @default("grid") // grid, carousel, list
+
+  priority          Int           @default(0)
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+// Analytics
+model Analytics {
+  id                String        @id @default(cuid())
+  shop              String
+  shopSettings      ShopSettings  @relation(fields: [shop], references: [shop])
+
+  date              DateTime      @default(now())
+
+  // Metrics
+  cartViews         Int           @default(0)
+  addedToCart       Int           @default(0)
+  upsellClicks      Int           @default(0)
+  upsellConversions Int           @default(0)
+  totalRevenue      Float         @default(0)
+  upsellRevenue     Float         @default(0)
+
+  createdAt         DateTime      @default(now())
+
+  @@index([shop, date])
+}
+
+// Discount Codes (for future implementation)
+model DiscountCode {
+  id                String   @id @default(cuid())
+  shop              String
+  code              String
+  type              String   // percentage, fixed_amount
+  value             Float
+  minCartValue      Float?
+  maxUses           Int?
+  currentUses       Int      @default(0)
+  expiresAt         DateTime?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([shop, code])
+}
