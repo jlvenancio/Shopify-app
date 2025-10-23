@@ -1,0 +1,35 @@
+{
+  "Remix Route": {
+    "prefix": "remix-route",
+    "body": [
+      "import type { LoaderFunctionArgs } from \"@remix-run/node\";",
+      "import { json } from \"@remix-run/node\";",
+      "import { useLoaderData } from \"@remix-run/react\";",
+      "import { authenticate } from \"~/shopify.server\";",
+      "",
+      "export const loader = async ({ request }: LoaderFunctionArgs) => {",
+      "  const { session } = await authenticate.admin(request);",
+      "  return json({ $1 });",
+      "};",
+      "",
+      "export default function Component() {",
+      "  const data = useLoaderData<typeof loader>();",
+      "  return <div>$0</div>;",
+      "}"
+    ]
+  },
+  "Console Log": {
+    "prefix": "clo",
+    "body": ["console.log('$1:', $1);"]
+  },
+  "Try Catch": {
+    "prefix": "tryc",
+    "body": [
+      "try {",
+      "  $1",
+      "} catch (error) {",
+      "  console.error('Error:', error);",
+      "}"
+    ]
+  }
+}

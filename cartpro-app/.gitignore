@@ -15,7 +15,7 @@ prisma/migrations/*/migration.sql
 Thumbs.db
 
 # IDE
-.vscode
+# .vscode is now tracked - contains workspace settings
 .idea
 *.swp
 *.swo
